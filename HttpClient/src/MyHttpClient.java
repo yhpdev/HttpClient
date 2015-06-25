@@ -3,7 +3,11 @@
  */
 import java.awt.event.*;
 import javax.swing.*;
+import javax.swing.JTextArea;
+import javax.swing.JTextField;
 
+import java.awt.event.FocusEvent;
+import java.awt.event.FocusListener;
 import java.io.IOException;
 
 import org.apache.commons.httpclient.Cookie;
@@ -12,6 +16,7 @@ import org.apache.commons.httpclient.HttpException;
 import org.apache.commons.httpclient.NameValuePair;
 import org.apache.commons.httpclient.methods.PostMethod;
 
+import java.lang.String;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
@@ -34,6 +39,9 @@ class MainFrame extends JFrame {
     public static int labelPos[][] = {{20, 0, 100, 30}, {20, 90, 200, 30}, {20, 160, 300, 30}, {20, 370, 200, 30}};
     public static String serverText[] = {"Main Server", "Game Server", "Chat Server"};
 
+    public final String hint = "{\"cmd\": \"101\", \"username\": \"flyfish\", \"password\": \"123456\", " +
+            "\"reqid\": \"999\"}";
+
     public JComboBox serverChoice = null;
     public JTextField serverURL = null;
 
@@ -51,7 +59,8 @@ class MainFrame extends JFrame {
         MAIN_SERVER, GAME_SERVER, CHAT_SERVER
     }
 
-    public CHOICES curChoice = CHOICES.MAIN_SERVER;
+    public CHOICES preChoice = CHOICES.MAIN_SERVER;
+    public CHOICES curChoice = preChoice;
 
     public Cookie cookies[] = null;
     public static HttpClient httpClient = null;
@@ -144,8 +153,12 @@ class MainFrame extends JFrame {
                 e.printStackTrace();
             }
 
-            // 获取cookies
-            setCookie(curChoice);
+            // 判断是否需要重新获取cookie
+            if (curChoice != preChoice) {
+                // 获取cookies, 并更新指针
+                setCookie(curChoice);
+                preChoice = curChoice;
+            }
 
             // 获取服务器配置信息
             String url = serverURL.getText();
@@ -179,6 +192,41 @@ class MainFrame extends JFrame {
             } catch (IOException e) {
                 e.printStackTrace();
             }
+        }
+    }
+
+    /*
+    自定义文本控件, 实现输入提示功能
+     */
+    class HintTextArea extends JTextArea implements FocusListener {
+        private final String hint;
+        private boolean showingHint;
+
+        public HintTextArea(final String hint, int width, int height) {
+            super(hint, width, height);
+            this.hint = hint;
+            this.showingHint = true;
+            super.addFocusListener(this);
+        }
+
+        @Override
+        public void focusGained(FocusEvent event) {
+            if (!this.getText().isEmpty()) return;
+            super.setText("");
+            showingHint = false;
+        }
+
+        @Override
+        public void focusLost(FocusEvent event) {
+            if (this.getText().isEmpty()) {
+                super.setText(hint);
+                showingHint = true;
+            }
+        }
+
+        @Override
+        public String getText() {
+            return showingHint ? "" : super.getText();
         }
     }
 
@@ -217,12 +265,16 @@ class MainFrame extends JFrame {
 
             serverURL = new JTextField("http://192.168.1.86:10100/domaincmd");
             serverURL.setBounds(20, 120, 400, 30);
+            serverURL.setEditable(false);
             this.add(serverURL);
 
-            sendArea = new JTextArea(100, 50);
+            // Hint
+
+            sendArea = new HintTextArea(hint, 100, 50);
             sendArea.setLineWrap(true);
             contentArea = new JTextArea(100, 50);
             contentArea.setLineWrap(true);
+            contentArea.setEditable(false);
             sendScrollBar = new JScrollPane(sendArea);
             contentScrollBar = new JScrollPane(contentArea);
 
@@ -244,7 +296,11 @@ class MainFrame extends JFrame {
                 public void actionPerformed(ActionEvent e) {
                     if (!canClick) return;
                     canClick = false;
-                    if (sendArea.getText() == "" || sendArea.getText().length() == 0) return;
+                    if (sendArea.getText() == "" || sendArea.getText().length() == 0) {
+                        JOptionPane.showMessageDialog(null, "表单不能为空!", "错误提示",
+                                JOptionPane.INFORMATION_MESSAGE);
+                        return;
+                    }
                     new myThread().start();
                 }
             });
