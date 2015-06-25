@@ -97,7 +97,6 @@ class MainFrame extends JFrame {
         method.setRequestBody(nameValuePairs);
         try {
             httpClient.executeMethod(method);
-            contentArea.setText(method.getResponseBodyAsString());
             cookies = httpClient.getState().getCookies();
         } catch (HttpException ex) {
             // TODO Auto-generated catch block
@@ -151,9 +150,6 @@ class MainFrame extends JFrame {
             // 获取服务器配置信息
             String url = serverURL.getText();
             httpClient = getInstance();
-            for (Cookie cookie : cookies) {
-                System.out.println("zzz:::" + cookie);
-            }
             httpClient.getState().addCookies(cookies);
             PostMethod method = new PostMethod(url);
             if (nameValuePairs == null || nameValuePairs.length == 0) return;
