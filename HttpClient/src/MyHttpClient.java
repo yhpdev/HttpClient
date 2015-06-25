@@ -59,8 +59,7 @@ class MainFrame extends JFrame {
         MAIN_SERVER, GAME_SERVER, CHAT_SERVER
     }
 
-    public CHOICES preChoice = CHOICES.MAIN_SERVER;
-    public CHOICES curChoice = preChoice;
+    public CHOICES curChoice = CHOICES.MAIN_SERVER;
 
     public Cookie cookies[] = null;
     public static HttpClient httpClient = null;
@@ -129,7 +128,10 @@ class MainFrame extends JFrame {
             }
 
             try {
-                Map<String, String> maps = objectMapper.readValue(sendArea.getText(), Map.class);
+                // 简单处理输入的文本
+                String str0 = sendArea.getText();
+                str0 = str0.replaceAll("'", "\"");
+                Map<String, String> maps = objectMapper.readValue(str0, Map.class);
                 Set<String> key = maps.keySet();
                 Iterator<String> iter0 = key.iterator();
                 int size = maps.size();
@@ -153,12 +155,8 @@ class MainFrame extends JFrame {
                 e.printStackTrace();
             }
 
-            // 判断是否需要重新获取cookie
-            if (curChoice != preChoice) {
-                // 获取cookies, 并更新指针
-                setCookie(curChoice);
-                preChoice = curChoice;
-            }
+            // 获取cookies
+            setCookie(curChoice);
 
             // 获取服务器配置信息
             String url = serverURL.getText();
