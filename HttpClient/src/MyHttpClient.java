@@ -135,14 +135,12 @@ class MainFrame extends JFrame {
                 Set<String> key = maps.keySet();
                 Iterator<String> iter0 = key.iterator();
                 int size = maps.size();
-                if (size > 0) {
-                    nameValuePairs = new NameValuePair[size];
-                }
+                if (size <= 0) return;
+                nameValuePairs = new NameValuePair[size];
                 int index = 0;
                 NameValuePair nameValuePair = null;
                 while (iter0.hasNext()) {
                     String field = iter0.next();
-                    maps.get(field);
                     nameValuePair = new NameValuePair(field, maps.get(field).toString());
                     nameValuePairs[index] = nameValuePair;
                     index++;
