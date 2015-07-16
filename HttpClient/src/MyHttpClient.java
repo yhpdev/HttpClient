@@ -86,19 +86,19 @@ class MainFrame extends JFrame {
         httpClient = getInstance();
         String url = "http://192.168.1.86:10100/domaincmd";
         NameValuePair nameValuePairs[] = null;
+        // 登录main服务器
         if (choice == CHOICES.MAIN_SERVER) {
-            nameValuePairs = new NameValuePair[4];
+            nameValuePairs = new NameValuePair[3];
             nameValuePairs[0] = new NameValuePair("cmd", "101");
             nameValuePairs[1] = new NameValuePair("username", "flyfish");
             nameValuePairs[2] = new NameValuePair("password", "123456");
-            nameValuePairs[3] = new NameValuePair("reqid", "9999");
         }
-        else if (choice == CHOICES.GAME_SERVER){
+        // 其余情况登录game服务器
+        else {
             url = "http://192.168.1.86:10101/dogamecmd";
-            nameValuePairs = new NameValuePair[3];
+            nameValuePairs = new NameValuePair[2];
             nameValuePairs[0] = new NameValuePair("cmd", "201");
             nameValuePairs[1] = new NameValuePair("username", "flyfish");
-            nameValuePairs[2] = new NameValuePair("reqid", "9999");
         }
         if (nameValuePairs == null || nameValuePairs.length == 0) return;
         PostMethod method = new PostMethod(url);
